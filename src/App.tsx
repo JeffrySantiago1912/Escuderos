@@ -1,6 +1,6 @@
 import { useMemo, useRef, useState } from 'react'
 import { motion } from 'framer-motion'
-import { DndContext, useDraggable, useDroppable, DragOverlay } from '@dnd-kit/core'
+import { DndContext, useDraggable, useDroppable, DragOverlay, PointerSensor, useSensor, useSensors } from '@dnd-kit/core'
 import type { DragEndEvent, DragStartEvent } from '@dnd-kit/core'
 import { CalendarDays, Download, Sparkles, ChevronRight, ChevronDown, Layout, FileText, CheckCircle2, Zap, Sun, Moon } from 'lucide-react'
 import { Button } from './components/ui/button'
@@ -37,7 +37,6 @@ const SHIFT_TIMES: ShiftTime[] = [
   { id: '18:30', label: '6:30 PM', period: 'night', defaultAttire: 'Camisa blanca, chaqueta azul, pantalón negro, zapatos negros.' },
 ]
 
-const SUNDAY_TIME_IDS: ShiftTimeId[] = ['07:00', '09:30', '11:00', '18:00']
 
 type Squire = {
   id: string
@@ -217,10 +216,11 @@ type DroppableShiftCellProps = {
   squire?: Squire
   conflicts: string[]
   onClear: () => void
+  onAssign: (squireId: string) => void
   isDark?: boolean
 }
 
-function DroppableShiftCell({ shift, squire, conflicts, onClear, isDark = true }: DroppableShiftCellProps) {
+function DroppableShiftCell({ shift, squire, conflicts, onClear, onAssign, isDark = true }: DroppableShiftCellProps) {
   const { setNodeRef, isOver } = useDroppable({
     id: `shift-${shift.id}`,
     data: { type: 'shift', shiftId: shift.id },
@@ -263,9 +263,29 @@ function DroppableShiftCell({ shift, squire, conflicts, onClear, isDark = true }
               </button>
             </>
           ) : (
-            <span className={cn("text-[11px]", isDark ? "text-slate-500" : "text-slate-400")}>
-              Vacio
-            </span>
+            <div className="relative flex w-full items-center">
+              <select
+                className={cn(
+                  "w-full appearance-none bg-transparent px-2 py-0.5 text-[11px] font-bold outline-none cursor-pointer",
+                  isDark ? "text-slate-400 hover:text-blue-400" : "text-slate-500 hover:text-blue-600"
+                )}
+                onChange={(e) => {
+                  if (e.target.value) onAssign(e.target.value)
+                }}
+                value=""
+              >
+                <option value="" disabled className={isDark ? "bg-slate-900" : "bg-white"}>Asignar...</option>
+                {SQUIRES.map((s) => (
+                  <option key={s.id} value={s.id} className={isDark ? "bg-slate-900 text-slate-200" : "bg-white text-slate-800"}>
+                    {s.name}
+                  </option>
+                ))}
+              </select>
+              <ChevronDown className={cn(
+                "pointer-events-none absolute right-1 h-3.5 w-3.5 transition-transform group-hover:scale-110",
+                isDark ? "text-slate-500" : "text-slate-400"
+              )} />
+            </div>
           )}
         </div>
 
@@ -364,6 +384,14 @@ function App() {
   const [activeId, setActiveId] = useState<string | null>(null)
 
   const scheduleRef = useRef<HTMLDivElement | null>(null)
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8,
+      },
+    })
+  )
 
   const shiftsByDate: Record<string, Shift[]> = useMemo(() => {
     const groups: Record<string, Shift[]> = {}
@@ -985,6 +1013,7 @@ function App() {
                       <Layout className="mr-1.5 h-3.5 w-3.5" />
                       Imagen
                     </Button>
+
                   </div>
                 </div>
               </CardHeader>
@@ -1219,6 +1248,13 @@ function App() {
                                       squire={squire}
                                       conflicts={conflicts}
                                       isDark={isDark}
+                                      onAssign={(squireId) =>
+                                        setShifts((prev) =>
+                                          prev.map((s) =>
+                                            s.id === shift.id ? { ...s, squireId } : s,
+                                          ),
+                                        )
+                                      }
                                       onClear={() =>
                                         setShifts((prev) =>
                                           prev.map((s) =>
@@ -1294,7 +1330,7 @@ function App() {
   const activeSquire = activeId ? SQUIRES.find((s) => s.id === activeId.replace('squire-', '')) : null
 
   return (
-    <DndContext onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
+    <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
       {view === 'landing' ? renderLanding() : renderPlanner()}
       <DragOverlay dropAnimation={null}>
         {activeSquire ? (
