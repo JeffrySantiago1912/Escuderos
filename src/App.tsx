@@ -15,7 +15,6 @@ import { Badge } from './components/ui/badge'
 import { cn } from './lib/utils'
 import html2canvas from 'html2canvas'
 import jsPDF from 'jspdf'
-import * as XLSX from 'xlsx'
 import './App.css'
 
 type Period = 'morning' | 'night'
@@ -105,11 +104,6 @@ function dateToISO(date: Date): string {
   const m = `${date.getMonth() + 1}`.padStart(2, '0')
   const d = `${date.getDate()}`.padStart(2, '0')
   return `${y}-${m}-${d}`
-}
-
-function formatISODate(iso: string): string {
-  const [y, m, d] = iso.split('-').map(Number)
-  return `${d.toString().padStart(2, '0')} ${monthNames[m - 1]} ${y}`
 }
 
 function getShiftTime(timeId: ShiftTimeId) {
@@ -487,30 +481,6 @@ function App() {
 
   function handleClearAssignments() {
     setShifts((prev) => prev.map((s) => ({ ...s, squireId: undefined })))
-  }
-
-  function handleExportExcel() {
-    const rows = shifts.map((shift) => {
-      const [y, m, d] = shift.date.split('-').map(Number)
-      const dateObj = new Date(y, m - 1, d)
-      const weekday = weekdayNames[dateObj.getDay()]
-      const time = getShiftTime(shift.timeId)
-      const squire = SQUIRES.find((s) => s.id === shift.squireId)
-
-      return {
-        Fecha: formatISODate(shift.date),
-        Día: weekday,
-        Horario: time.label,
-        Vestimenta: shift.attire,
-        Escudero: squire?.name ?? '',
-      }
-    })
-
-    const sheet = XLSX.utils.json_to_sheet(rows)
-    const workbook = XLSX.utils.book_new()
-    XLSX.utils.book_append_sheet(workbook, sheet, 'Turnos')
-    const fileName = `turnos-escuderos-${monthYear.month + 1}-${monthYear.year}.xlsx`
-    XLSX.writeFile(workbook, fileName)
   }
 
   async function handleExportImage() {
