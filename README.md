@@ -2,7 +2,13 @@
 
 **Escuderos** es una plataforma moderna y minimalista diseñada para la gestión inteligente de turnos dominicales y servicios eclesiásticos. Olvida las hojas de cálculo confusas: gestiona tu equipo con una interfaz de nivel profesional inspirada en herramientas como Notion y Linear.
 
-![Banner Escuderos](https://via.placeholder.com/1200x400/0f172a/ffffff?text=Escuderos+-+Gestion+de+Turnos+2.0)
+Se puede utilizar tanto el dark mode, como el light mode.
+
+<img width="1920" height="1254" alt="screencapture-jeffrysantiago1912-github-io-Escuderos-2026-02-04-12_45_35" src="https://github.com/user-attachments/assets/20f040e1-80df-4d99-bf0d-1d28eaca6488" />
+<img width="1920" height="1254" alt="screencapture-jeffrysantiago1912-github-io-Escuderos-2026-02-04-12_45_55" src="https://github.com/user-attachments/assets/6c364d16-2618-49f0-a455-9fe19cfd673d" />
+<img width="1920" height="3198" alt="screencapture-jeffrysantiago1912-github-io-Escuderos-2026-02-04-12_46_16" src="https://github.com/user-attachments/assets/a478a519-a27b-4438-b1e7-05e20ecb5bbc" />
+
+
 
 ## ✨ Características Principales
 
